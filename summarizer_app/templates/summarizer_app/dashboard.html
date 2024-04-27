@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        /* Styles for the popup modal */
+        .popup {
+            background-color: #f8f8f8;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 80%;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+        /* Style for close button */
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 50px;
+            color: #888;
+        }
+        .close-btn:hover {
+            color: #555;
+        }
+        .popup h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+        .summary {
+            width: 45%;
+            margin-right: 20px;
+        }
+        .summary h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        .summary textarea {
+            width: 100%;
+            height: 1cm; /* Changed height */
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+        }
+        .summary button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .summary button:hover {
+            background-color: #0056b3;
+        }
+        .score {
+            width: 45%;
+            text-align: center;
+        }
+        .score h2 {
+            font-size: 18px;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        .score p {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #777;
+            text-align: center;
+        }
+        .graph {
+            width: 55%;
+            text-align: center;
+        }
+        .steps_button {
+            align-items: center;
+            display: flex;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .view_topic_button {
+            align-items: center;
+            display: flex;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">DASH-BOARD</h1>
+    <div class="popup">
+        <button class="close-btn" onclick="closeDashboard()">✕</button>
+        <div class="summary">
+            <h2>Original Text</h2>
+            <textarea id="dashboardInputText" rows="1"></textarea> <!-- Changed rows to 1 -->
+            <h2>Generated Summary</h2>
+            <textarea id="dashboardSummarizedText" rows="1"></textarea> <!-- Changed rows to 1 -->
+            <h2>Enter Reference Summary Below for METRIC Test</h2>
+            <textarea id="referenceSummary" rows="1" cols="50"></textarea>
+            <button onclick="calculateROUGEScores()">Calculate ROUGE Scores</button>
+
+
+        </div>
+
+
+        <div class="score" id="scoreResults" style="display: none;">
+
+            <h2 style="font-size: 30px;">ROUGE Scores</h2>
+            <h2>ROUGE-1 Score:</h2>
+            <p id="rouge1Score"></p>
+            <h2>ROUGE-2 Score:</h2>
+            <p id="rouge2Score"></p>
+            <h2>ROUGE-L Score:</h2>
+            <p id="rougeLScore"></p>
+
+            <div class="word-counts">
+                <h2 style="font-size: 30px;">Word Counts</h2>
+                <p id="inputWordCount"></p>
+                <p id="summarizedWordCount"></p>
+            </div>
+
+        </div>
+
+
+        <div class="graph">
+            <canvas id="rougeRadarChart" width="200" height="200"></canvas>
+        </div>
+    </div>
+
+
+
+
+    <!-- <h1 style="text-align: center;">HYPER-PARAMETERS</h1> -->
+
+    <div class="popuphyperparameters" id="hyperparametersPopup">
+        <!-- <button class="close-btn" onclick="closeHyperparametersPopup()">✕</button> -->
+        <div class="hyperparameters-content" style="text-align: center;">
+            <!-- Hyperparameters will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <button class = 'view_topic_button' onclick="viewTopic()"> View Topic (View Topic Extraction Process)</button>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+    <script>
+        function closeDashboard() {
+            // Close the dashboard popup
+            document.querySelector('.popup').style.display = 'none';
+            
+            // Go back to the previous page in the browser history
+            window.history.back();
+        }
+
+        // Extract input text and summarized text from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const inputText = urlParams.get('input_text');
+        const summarizedText = urlParams.get('summarized_text');
+
+        // Populate the text boxes with input text and summarized text
+        document.getElementById('dashboardInputText').value = inputText;
+        document.getElementById('dashboardSummarizedText').value = summarizedText;
+
+        // Function to calculate ROUGE scores
+        function calculateROUGEScores() {
+            const inputText = document.getElementById('dashboardInputText').value.trim();
+            const summarizedText = document.getElementById('dashboardSummarizedText').value.trim();
+            const referenceSummary = document.getElementById('referenceSummary').value.trim();
+            const originalText = inputText.trim();
+            const generatedSummary = summarizedText.trim();
+
+                        // Update word counts
+            const inputWordCount = inputText.split(/\s+/).filter(word => word !== '').length;
+            const summarizedWordCount = summarizedText.split(/\s+/).filter(word => word !== '').length;
+            document.getElementById('inputWordCount').textContent = `Input Text Word Count: ${inputWordCount}`;
+            document.getElementById('summarizedWordCount').textContent = `Summarized Text Word Count: ${summarizedWordCount}`;
+
+            // Tokenize strings into arrays of words
+            const referenceTokens = referenceSummary.split(/\s+/);
+            const originalTokens = originalText.split(/\s+/);
+            const generatedTokens = generatedSummary.split(/\s+/);
+
+            // Function to calculate n-gram overlap
+            function calculateNGramOverlap(tokens1, tokens2, n) {
+                const ngrams1 = new Map();
+                for (let i = 0; i <= tokens1.length - n; i++) {
+                    const ngram = tokens1.slice(i, i + n).join(' ');
+                    ngrams1.set(ngram, (ngrams1.get(ngram) || 0) + 1);
+                }
+                
+                let overlapCount = 0;
+                for (let i = 0; i <= tokens2.length - n; i++) {
+                    const ngram = tokens2.slice(i, i + n).join(' ');
+                    if (ngrams1.has(ngram) && ngrams1.get(ngram) > 0) {
+                        overlapCount++;
+                        ngrams1.set(ngram, ngrams1.get(ngram) - 1);
+                    }
+                }
+                
+                return overlapCount;
+            }
+
+            // Function to calculate longest common subsequence
+            function calculateLCS(tokens1, tokens2) {
+                const m = tokens1.length;
+                const n = tokens2.length;
+                const dp = Array.from(Array(m + 1), () => Array(n + 1).fill(0));
+
+                for (let i = 1; i <= m; i++) {
+                    for (let j = 1; j <= n; j++) {
+                        if (tokens1[i - 1] === tokens2[j - 1]) {
+                            dp[i][j] = dp[i - 1][j - 1] + 1;
+                        } else {
+                            dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                        }
+                    }
+                }
+
+                return dp[m][n];
+            }
+
+            // Calculate ROUGE-1 score
+            const rouge1Overlap = calculateNGramOverlap(referenceTokens, generatedTokens, 1);
+            const rouge1Recall = rouge1Overlap / referenceTokens.length;
+            const rouge1Precision = rouge1Overlap / generatedTokens.length;
+            const rouge1F1Score = (2 * rouge1Precision * rouge1Recall) / (rouge1Precision + rouge1Recall);
+
+            // Calculate ROUGE-2 score
+            const rouge2Overlap = calculateNGramOverlap(referenceTokens, generatedTokens, 2);
+            const rouge2Recall = rouge2Overlap / (referenceTokens.length - 1);
+            const rouge2Precision = rouge2Overlap / (generatedTokens.length - 1);
+            const rouge2F1Score = (2 * rouge2Precision * rouge2Recall) / (rouge2Precision + rouge2Recall);
+
+            // Calculate ROUGE-L score
+            const rougeLCS = calculateLCS(referenceTokens, generatedTokens);
+            const rougeLRecall = rougeLCS / referenceTokens.length;
+            const rougeLPrecision = rougeLCS / generatedTokens.length;
+            const rougeLF1Score = (2 * rougeLPrecision * rougeLRecall) / (rougeLPrecision + rougeLRecall);
+
+            // Display ROUGE scores
+            document.getElementById('rouge1Score').textContent = rouge1F1Score.toFixed(2);
+            document.getElementById('rouge2Score').textContent = rouge2F1Score.toFixed(2);
+            document.getElementById('rougeLScore').textContent = rougeLF1Score.toFixed(2);
+
+            // Show score results
+            document.getElementById('scoreResults').style.display = 'block';
+
+            // Create a radar chart for ROUGE scores
+            const ctx = document.getElementById('rougeRadarChart').getContext('2d');
+            const rougeRadarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['ROUGE-1', 'ROUGE-2', 'ROUGE-L'],
+                    datasets: [{
+                        label: 'ROUGE Scores',
+                        data: [rouge1F1Score, rouge2F1Score, rougeLF1Score],
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 1
+                        }
+                    }
+                }
+            });
+        }
+
+        
+        function showHyperparametersPopup() {
+            // Parse URL query parameters
+            const algorithm = urlParams.get('algorithm');
+            const hyperparameters = JSON.parse(urlParams.get('hyperparameters'));
+
+            // Generate HTML content for hyperparameters
+            let hyperparametersHTML = '<h2>Hyperparameters</h2><ul style="list-style-type: none; text-align: center; padding: 0;">';
+
+            // Check the algorithm and generate content accordingly
+            if (algorithm === 'T5_our') {
+                hyperparametersHTML += `<li>Algorithm Used: T5</li>`;
+                hyperparametersHTML += `<li>Summary Length: ${hyperparameters.summaryLength}</li>`;
+                hyperparametersHTML += `<li>Max Length: ${hyperparameters.maxLength}</li>`;
+                hyperparametersHTML += `<li>Length Penalty: ${hyperparameters.lengthPenalty}</li>`;
+                hyperparametersHTML += `<li>Num Beams: ${hyperparameters.numBeams}</li>`;
+                hyperparametersHTML += `<li>Early Stopping: ${hyperparameters.earlyStopping}</li>`;
+            } else if (algorithm === 'LSA') {
+                hyperparametersHTML += `<li>Algorithm Used: LSA</li>`;
+                hyperparametersHTML += `<li>Number of Sentences: ${hyperparameters.numberOfSentences}</li>`;
+
+                // Create a button element
+                hyperparametersHTML += `<button class="steps_button" onclick="showLSASteps()">Show Steps</button>`;
+            }
+
+            hyperparametersHTML += '</ul>';
+
+            // Set the HTML content to the hyperparameters popup
+            document.getElementById('hyperparametersPopup').style.display = 'block';
+            document.querySelector('.hyperparameters-content').innerHTML = hyperparametersHTML;
+        }
+
+
+
+
+
+        // Function to close hyperparameters popup
+        function closeHyperparametersPopup() {
+            document.getElementById('hyperparametersPopup').style.display = 'none';
+        }
+
+        // Call showHyperparametersPopup() when the page loads
+        window.onload = function() {
+            showHyperparametersPopup();
+        };
+
+        // Function to show LSA steps
+        function showLSASteps() {
+            fetch('/fetch-lsa-summary-details')
+                .then(response => response.json())
+                .then(summaryDetails => {
+                    // Check if summaryDetails is not empty
+                    if (Object.keys(summaryDetails).length !== 0) {
+                        // Create a container for steps
+                        const stepsContainer = document.createElement('div');
+                        stepsContainer.classList.add('summary-steps-container'); // Add a class for styling
+
+                        // Define the steps in the desired order
+                        const stepsOrder = [
+                            'input_text',
+                            'clean_text',
+                            'normalized_text',
+                            'tokenized_sentences',
+                            'tokenized_words',
+                            'term_document_matrix',
+                            'dtm',
+                            'mean_centered_dtm',
+                            'covariance_matrix',
+                            'eigenvalues',
+                            'eigenvectors',
+                            'sentence_scores',
+                            'summary_sentences'
+                        ];
+
+                        // Create and append CSS styles for highlighting step labels
+                        const styleElement = document.createElement('style');
+                        styleElement.textContent = `
+                            .step-label {
+                                font-weight: bold;
+                                color: #007bff; /* Highlight color */
+                            }
+                            .step-rectangular-box {
+                                width: 800px;
+                                height: 100px;
+                                border: 1px solid #ced4da; /* Border color */
+                                padding: 10px;
+                                margin-top: 5px;
+                                overflow: auto;
+                                /* Add additional styling as needed */
+                            }
+                        `;
+                        document.head.appendChild(styleElement);
+
+                        // Create and append elements for each detail
+                        stepsOrder.forEach((stepKey, index) => {
+                            if (summaryDetails.hasOwnProperty(stepKey)) {
+                                const stepDetail = summaryDetails[stepKey];
+
+                                // Create a step container
+                                const stepContainer = document.createElement('div');
+                                stepContainer.classList.add('step-container'); // Add a class for styling
+
+                                // Add a label for the step
+                                const stepLabel = document.createElement('label');
+                                stepLabel.style.display= 'block';
+                                stepLabel.style.fontSize = '30px';
+
+                                // stepLabel.classList.add('step-label'); // Add a class for styling
+                                stepLabel.textContent = `Step ${index + 1}: ${stepKey.replace('_', ' ')}`;
+                                stepContainer.appendChild(stepLabel);
+
+                                // Add a rectangular box for the step detail
+                                const stepTextBox = document.createElement('textarea');
+                                stepTextBox.style.width = '1200px';
+                                stepTextBox.style.height = '300px';
+
+                                stepTextBox.classList.add('step-text-box'); // Add a class for styling
+                                stepTextBox.setAttribute('readonly', true); // Make field read-only
+                                stepTextBox.value = stepDetail;
+                                stepContainer.appendChild(stepTextBox);
+
+                                // Append the step container to the steps container
+                                stepsContainer.appendChild(stepContainer);
+                            }
+                        });
+
+                        // Insert the steps container after the button
+                        const stepsButton = document.querySelector('.steps_button');
+                        stepsButton.parentNode.insertBefore(stepsContainer, stepsButton.nextSibling);
+                    } else {
+                        // If summaryDetails is empty, display a message or handle it accordingly
+                        console.error('Error: Empty summary details.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching LSA summary details:', error);
+                });
+        }
+
+
+        function viewTopic() {
+            // Send an AJAX request to fetch TF-IDF details
+            $.ajax({
+                url: '/fetch-tfidf-details/', // URL to fetch TF-IDF details
+                type: 'GET',
+                success: function(response) {
+                    console.log('Success: Response received from server:', response);
+                    // Check if response is not empty
+                    if (Object.keys(response).length !== 0) {
+                        // Create a container for topic details
+                        const topicContainer = document.createElement('div');
+                        topicContainer.classList.add('topic-details-container'); // Add a class for styling
+                        topicContainer.style.textAlign = 'center'; // Center all elements
+
+                        // Define the topic details in the desired order
+                        const topicOrder = [
+                            { key: 'input_text', label: 'Input Text' },
+                            { key: 'preprocessed_text', label: 'Preprocessed Text' },
+                            { key: 'tokenized_words', label: 'Tokenized Words' },
+                            { key: 'tagged_words', label: 'Tagged Words' },
+                            { key: 'noun_words', label: 'Noun Words' },
+                            { key: 'tfidf_scores', label: 'TF-IDF Scores' },
+                            { key: 'sorted_words', label: 'Sorted Words' },
+                            { key: 'top_topics', label: 'Top Topics' },
+                            { key: 'short_topic', label: 'Short Topic' }
+                        ];
+
+                        // Create and append elements for each detail
+                        topicOrder.forEach((detail, index) => {
+                            if (response.hasOwnProperty(detail.key)) {
+                                let detailValue = response[detail.key];
+
+                                // Special case for tfidf_scores
+                                if (detail.key === 'tfidf_scores') {
+                                    // Convert the object to a string representation
+                                    detailValue = JSON.stringify(detailValue, null, 2);
+                                }
+
+                                // Create a detail container
+                                const detailContainer = document.createElement('div');
+                                detailContainer.classList.add('detail-container'); // Add a class for styling
+                                detailContainer.style.marginBottom = '20px'; // Add margin between elements
+
+                                // Add a label for the detail
+                                const detailLabel = document.createElement('label');
+                                detailLabel.textContent = `Step ${index + 1}: ${detail.label}`; // Display as "Step 1: Input Text"
+                                detailLabel.style.fontWeight = 'bold';
+                                detailLabel.style.fontSize = '30px';
+                                detailLabel.style.display = 'block';
+                                detailLabel.style.marginBottom = '10px'; // Add margin below label
+                                detailContainer.appendChild(detailLabel);
+
+                                // Add a text area for the detail value
+                                const detailTextArea = document.createElement('textarea');
+                                detailTextArea.value = detailValue;
+                                detailTextArea.rows = 10; // Adjust height as needed
+                                detailTextArea.cols = 100; // Width 100 characters
+                                detailTextArea.style.width = '1200px';
+                                detailTextArea.style.height = '100px';
+                                detailTextArea.style.resize = 'none'; // Disable resizing
+                                detailContainer.appendChild(detailTextArea);
+
+                                // Append the detail container to the topic container
+                                topicContainer.appendChild(detailContainer);
+                            }
+                        });
+
+                        // Insert the topic container after the button
+                        const topicButton = document.querySelector('.view_topic_button');
+                        topicButton.parentNode.insertBefore(topicContainer, topicButton.nextSibling);
+                    } else {
+                        // If response is empty, display a message or handle it accordingly
+                        console.error('Error: Empty topic details.');
+                    }
+                },
+                error: function(xhr, errmsg, err) {
+                    // Handle error if any
+                    console.error('Error fetching TF-IDF details:', errmsg);
+                }
+            });
+        }
+
+
+
+
+
+
+    </script>
+
+</body>
+</html>

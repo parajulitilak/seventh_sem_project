@@ -1,0 +1,240 @@
+{% extends 'summarizer_app/base.html' %}
+{% load static %}
+
+{% block title %}TextSummarizer{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-7" id="left-content">
+            <div id="left-content-inner"></div> <!-- Placeholder for generated content -->
+        </div>
+        <div class="col-md-5" id="right-content">
+            <div class="right-content-inner">
+                <div class="content-wrapper">
+                    <h1>Welcome to Our Summarizer Tool</h1>
+                    <p>Summarize long texts quickly and efficiently with our state-of-the-art summarization algorithms.
+                    </p>
+                    <div class="cta-buttons">
+                        <a href="{% url 'summarizer_app:register' %}" class="btn btn-primary btn-sm">Sign Up</a>
+                        <a href="{% url 'summarizer_app:login' %}" class="btn btn-secondary btn-sm">Login</a>
+                    </div>
+                </div>
+                <footer>
+                    <p>&copy; 2024 All Rights Reserved.</p>
+                </footer>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const leftContent = document.getElementById("left-content-inner");
+
+
+        // Text to generate token-by-token
+        const text = "Pioneering the fusion of advanced AI techniques for precise medical text summarization. Unveiling hidden insights from vast medical literature with cutting-edge algorithms. Empowering researchers with efficient access to critical medical discoveries.";
+
+
+        let index = 0;
+
+
+        function generateToken() {
+            if (index < text.length) {
+                const token = text[index];
+                const tokenElement = document.createElement("span");
+                tokenElement.textContent = token;
+                tokenElement.style.fontSize = "50px"; // Larger font size for token-by-token generation
+                // tokenElement.style.color="purple";
+                tokenElement.style.color = "#d8aaff"; // Light purple color
+                leftContent.appendChild(tokenElement);
+
+
+                index++;
+            } else {
+                // Reset index to start generating text again
+                index = 0;
+                leftContent.innerHTML = ""; // Clear existing text
+            }
+            setTimeout(generateToken, 100); // Adjust speed of token generation (milliseconds)
+        }
+
+
+        generateToken();
+    });
+</script>
+
+
+<style>
+    body {
+        background-color: #f8f9fa;
+        color: #2c3e50;
+        font-family: Arial, sans-serif;
+        display: flex;
+        /* Enable flexbox */
+        min-height: 100vh;
+        /* Set minimum height of body to 100% viewport height */
+        margin: 0;
+        /* Remove default margin */
+    }
+
+
+    .container {
+
+        display: flex;
+        /* Enable flexbox */
+        flex-grow: 1;
+        /* Allow container to grow and shrink */
+    }
+
+
+    .row {
+        display: flex;
+        /* background-color: (210,146,255,1); */
+        background-color: #06002d;
+        /* Enable flexbox */
+        flex-grow: 1;
+        /* Allow row to grow and shrink */
+    }
+
+
+    #left-content {
+        width: 60%;
+        padding-inline: 50px;
+        /* padding-top: 200px; */
+        margin-top: 20%;
+    }
+
+
+    #right-content {
+        width: 40%;
+        background-color: rgb(0, 0, 0);
+        /* Light black-white color with transparency */
+        padding: 20px;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+
+    .right-content-inner {
+        /* padding-top: 150px; */
+        margin-block: auto;
+        display: flex;
+        justify-content: center;
+        /* Center content horizontally */
+        align-items: center;
+        /* Center content vertically */
+        flex-direction: column;
+    }
+
+
+    .content-wrapper {
+        text-align: center;
+        /* Center text within wrapper */
+    }
+
+
+    h1 {
+        font-size: 28px;
+        margin-bottom: 20px;
+        color: #4e67eb;
+        /* Change heading color */
+    }
+
+
+    p {
+        font-size: 16px;
+        margin-bottom: 20px;
+        color: #6c757d;
+        /* Change paragraph color */
+    }
+
+
+    .cta-buttons {
+        display: flex;
+        margin-right: 20px;
+        flex-direction: column;
+        /* Align buttons vertically */
+        margin-top: auto;
+        /* Align buttons at the bottom */
+    }
+
+
+    .btn {
+        display: inline-block;
+        padding: 8px 15px;
+        /* Adjust button padding */
+        margin-bottom: 10px;
+        /* Add margin between buttons */
+        text-decoration: none;
+        color: #fff;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+
+
+    .btn-primary {
+        background-color: #4e67eb;
+    }
+
+
+    .btn-secondary {
+        background-color: #6c757d;
+    }
+
+
+    .btn:hover {
+        background-color: #3248b8;
+    }
+
+    footer{
+        position: fixed;
+            bottom: 0;
+    }
+
+    @media screen and (max-width: 1000px) {
+        #left-content {
+            display: none;
+            /* Hide left content on small screens */
+        }
+
+
+        #right-content {
+            width: 100%;
+            display: block;
+            /* Make right content full width on small screens */
+        }
+
+        .right-content-inner {
+            padding-top: 40%;
+            padding-inline: 40px;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #4e67eb;
+            /* Change heading color */
+        }
+
+
+        p {
+            font-size: 26px;
+            margin-bottom: 20px;
+            color: #6c757d;
+            /* Change paragraph color */
+        }
+
+        .btn {
+            height: 60px;
+            font-size: 30px;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}

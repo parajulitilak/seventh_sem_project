@@ -1,0 +1,112 @@
+<!-- summarizer_app/templates/registration/register.html -->
+<!-- register.html -->
+{% extends 'summarizer_app/base.html' %}
+{% block title %}Register{% endblock %}
+{% block content %}
+  <style>
+    /* Center the form */
+    .form-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh; /* Set the height of the container to full viewport height */
+    }
+
+    /* Style the form */
+    .form-box {
+      width: 300px;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Style the form headings */
+    .form-box h2 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* Style the form elements */
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+
+    /* Style for error message */
+    .error-message {
+      color: red;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    /* Style for success message */
+    .success-message {
+      color: green;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+  </style>
+
+  <div class="form-container">
+    <div class="form-box">
+      <h2>Register</h2>
+      {% if registration_success %}
+        <div class="success-message">
+          Registration successful. Please login.
+        </div>
+      {% endif %}
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Register</button>
+        <!-- Error message for password validation -->
+        <div class="error-message" id="password-error"></div>
+      </form>
+      <p>Already have an account? <a href="{% url 'summarizer_app:login' %}">Login</a></p>
+    </div>
+  </div>
+
+  <script>
+    document.querySelector('form').addEventListener('submit', function(event) {
+      // Get the password input field
+      var passwordInput = document.querySelector('#id_password');
+
+      // Regular expression to validate password format
+      var passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+      // Check if password meets the required format
+      if (!passwordRegex.test(passwordInput.value)) {
+        // Prevent form submission
+        event.preventDefault();
+
+        // Display error message
+        document.querySelector('#password-error').textContent = "Password must contain at least 8 characters, including one uppercase letter, one number, and one special character.";
+      }
+    });
+  </script>
+{% endblock %}

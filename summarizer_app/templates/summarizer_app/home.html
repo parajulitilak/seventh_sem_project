@@ -1,0 +1,536 @@
+<!-- summarizer_project/summarizer_app/templates/summarizer_app/home.html -->
+{% extends 'summarizer_app/base.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Summarization</title>
+    <link rel="stylesheet" href="{% static 'summarizer_app/css/styles.css' %}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+
+    <style>
+        .sidebar {
+            height: 100vh;
+            width: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #304356;
+            overflow-x: hidden;
+            overflow-y: hidden;
+            transition: 0.3s;
+            padding-top: 30px;
+            z-index: 3000;
+            color: white;
+            box-shadow: 2px 2px 2px #080808;
+        }
+
+
+        /* Styles for the links in the sidebar */
+        .sidebar a {
+            padding-block: 15px;
+            text-decoration: none;
+            font-size: 20px;
+            color: #818181;
+            display: block;
+            /* transition: 0.3s; */
+        }
+
+
+        /* Change color on hover */
+        .sidebar a:hover {
+            cursor: pointer;
+        }
+
+
+        /* Styles for the close button */
+        .sidebar .close-btn {
+            cursor: pointer;
+            font-size: 36px;
+        }
+
+
+        /* Styles to push content when sidebar is open */
+        .content {
+            /* transition: margin-left 0.5s; */
+            padding: 16px;
+        }
+
+
+        /* Styles for the button to open the sidebar */
+        #open-btn {
+            font-size: 30px;
+            cursor: pointer;
+            position: absolute;
+            z-index: 1;
+            top: 100px;
+            left: 20px;
+        }
+
+
+        .flex {
+            display: flex;
+            flex-direction: row;
+        }
+
+
+        .align-center {
+            align-items: center;
+            margin-inline: 10px;
+            justify-content: space-between;
+        }
+
+
+        .user {
+            font-size: 20px;
+            width: 200px;
+            height: 30px;
+            overflow: hidden;
+            font-weight: bold;
+        }
+
+
+        .sidebar-content {
+            margin-top: 10px;
+            padding-left: 8px;
+            padding-right: 10px;
+            height: 80%;
+            overflow-y: scroll;
+            scrollbar-color: #304356#304356;
+        }
+
+
+        .profile-container {
+            width: 250px;
+            height: 50px;
+            background-color: #3b5066;
+            position: absolute;
+            /* Change to fixed positioning */
+            bottom: 0;
+            /* Align to the bottom of the viewport */
+            left: 50%;
+            /* Center horizontally */
+            transform: translateX(-50%);
+            /* Center horizontally */
+            display: flex;
+            /* Use flexbox */
+            justify-content: center;
+            /* Center horizontally */
+            align-items: center;
+            /* Center vertically */
+            margin-bottom: 10px;
+            /* Add margin-bottom for spacing */
+            padding-top: 10px;
+        }
+
+
+        .dropdown {
+            position: absolute;
+            bottom: 100%;
+            /* Display above the profile name */
+            right: 2;
+            background-color: #364c65;
+            width: 246px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+            border-radius: 5px;
+            display: none;
+        }
+
+
+        .dropdown a {
+            padding-left: 30px;
+            text-decoration: none;
+            font-size: 16px;
+
+
+            display: block;
+            color: white;
+        }
+
+
+        .dropdown a:hover {
+            background-color: #5e80a5;
+        }
+
+
+        .profile-container:hover .dropdown {
+            display: block;
+        }
+
+
+        .profile {
+            width: fit-content;
+            margin-inline: auto;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+
+        #history-list i {
+            display: none;
+            color: red;
+        }
+
+
+        /* Show the trash can icon when the link is hovered */
+        #history-list:hover i {
+            display: inline-block;
+        }
+
+
+        #history-list:hover {
+            background-color: #3b5066;
+        }
+
+
+        #history-list {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            padding-inline: 5px;
+            border-radius: 5px;
+            height: 40px;
+        }
+
+
+        #history-list a {
+            overflow: hidden;
+            white-space: nowrap;
+            /* Prevents wrapping of text */
+            text-overflow: ellipsis;
+            font-size: 16px;
+        }
+
+        .history{
+            overflow: hidden;
+            white-space: nowrap;
+            /* Prevents wrapping of text */
+            text-overflow: ellipsis;
+            font-size: 16px;
+        }
+
+        .inner_hist{
+            background-color: aqua;
+        }
+
+        /* Media query for responsive design */
+        @media screen and (max-width: 768px) {
+            .sidebar {
+                width: 0;
+            }
+
+            .content {
+                margin-left: 0;
+            }
+        }
+
+        /* Popup container */
+        .popup {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Popup content */
+        .popup-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 60%;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            position: relative;
+        }
+
+        /* Close button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Error message */
+        .error-message {
+            color: red;
+        }
+
+        #dashboardButton {
+            display: block;
+            margin: 20px auto;
+        }
+        /* .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        } */
+        /* Popup container */
+        .popup {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5); /* Transparent background */
+        }
+
+        /* Popup content */
+        .popup-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 60%;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            position: relative;
+            background-color: transparent; /* Transparent background */
+        }
+
+        /* Close button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Error message */
+        .error-message {
+            color: red;
+        }
+
+        #dashboardButton {
+            display: block;
+            margin: 20px auto;
+        }
+
+        .popup-content form .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .popup-content form .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        #loadingSpinner {
+            display: none;
+            margin-left: 5px;
+        }
+
+        #loadingSpinner i {
+            animation: spin 1s infinite linear;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+
+
+    </style>
+</head>
+
+<body>
+    
+    <div class="content">
+        <div id="sidebar" class="sidebar">
+            <div class="flex align-center">
+                <div class="user">
+                    <p>History</p>
+                </div>
+                <div class="close-btn" onclick="toggleSidebar()">&times;</div>
+            </div>
+            <div class="sidebar-content">
+                <div class="history" id="historyLinks">
+                    <div class ="inner_hist">
+                        {% for history_item in user_history %}
+                        <!-- <div class="history-list" onclick="populateFromHistory('{{ history_item.input_text }}', '{{ history_item.summary_text }}')"> -->
+                        <div class="history-list" id="history-list" onclick="populateFromHistory('{{ history_item.short_topic }}', '{{ history_item.input_text }}', '{{ history_item.generated_summary }}')">
+                            <!-- <h3>{{ history_item.short_topic }}</h3> -->
+                            <!-- <h3>{{ history_item.input_text }}</h3> -->
+                            <p class="history-item" >{{ history_item.summarized_text }}</p>
+    
+                        </div>
+                        {% endfor %}
+                        
+                    </div>
+                    <div>
+                        krishna
+                    </div>
+
+                </div>
+                
+            </div>
+
+
+            <div class="profile-container">
+                <p class="profile">{{ user.get_full_name }}</p>
+                <div class="dropdown">
+                    <a href="#" onclick="logout()">Logout</a>
+                    <a href="#" onclick="deleteAllLinks()">Delete All History</a>
+                    <a href="#" onclick="deleteAccount()">Delete Account</a>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="open-btn" onclick="toggleSidebar()">&#9776;</div> <!-- Moved the button inside .content -->
+        <div class="card floating-box my-4 mx-5">
+            <h1 class="mb-4" style="text-align: center;">Text Summarization</h1>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 border-right pr-4">
+                        <h5>Original Text</h5>
+                        <label for="word_count_original"><strong>Word Count:</strong> <span
+                                id="word_count_original">0</span></label>
+                        <textarea id="input_text" name="input_text" class="form-control mb-2" rows="15"
+                            oninput="updateWordCount()"></textarea>
+                        <label for="algorithm">Choose Algorithm:</label>
+                        <select id="algorithm" name="algorithm" class="form-control mb-3" onchange="var algorithmSelect = document.getElementById('algorithm');
+                              var summaryLengthSpan = document.getElementById('sentences');
+                              if (algorithmSelect.value === 'LSA') {
+                                  summaryLengthSpan.style.display = 'inline';
+                              } else {
+                                  summaryLengthSpan.style.display = 'none';
+                              }">
+                            <option value="T5">T5 Original</option>
+                            <option value="T5_our">T5 Our model</option>
+                            <option value="LSA">LSA</option>
+                        </select>
+                        <span id="summary_length_value">Summary Length: 200</span>
+                        <span id="sentences" style="display: none;">Sentences</span>
+                        <input type="range" id="summary_length" name="summary_length" class="form-control-range mb-3"
+                            min="1" max="1000" value="200" oninput="updateSummaryLengthValue(this.value)">
+                        <button type="button" class="btn btn-primary" onclick="
+                              var inputText = document.getElementById('input_text').value.trim();
+                              if (inputText.length === 0) {
+                                  alert('Please enter some data before proceeding.');
+                                  return;
+                              }
+                              if (inputText.length < 30) {
+                                  alert('Please enter at least 30 characters');
+                                  return;
+                              }
+                              summarizeText();
+                          "> Summarize </button>
+
+
+                        <!-- Button to open the popup form (Initially hidden) -->
+                        <button id="hyperparametersButton" onclick="openHyperparametersPopup()" style="display: none;">Enter Hyperparameters</button>
+
+                        <!-- Popup form for hyperparameters -->
+                        <div id="hyperparametersPopup" class="popup">
+                            <div class="popup-content" style="background-color: rgba(255, 255, 255, 0.8); display: block;">
+                                <span class="close" onclick="closeHyperparametersPopup()">&times;</span>
+                                <h3 style="color: black;">Enter Hyperparameters</h3>
+                                <form id="hyperparametersForm">
+                                    <div class="form-group">
+                                        <label for="summaryLength">Summary Length:</label>
+                                        <input type="number" id="summaryLength" name="summaryLength" class="form-control" required min="1" max="450" value="450">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="maxLength">Max Length:</label>
+                                        <input type="number" id="maxLength" name="maxLength" class="form-control" required min="1" max="512" value="512">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lengthPenalty">Length Penalty:</label>
+                                        <input type="number" id="lengthPenalty" name="lengthPenalty" class="form-control" required min="0.1" max="10" step="0.1" value="2.0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="numBeams">Number of Beams:</label>
+                                        <input type="number" id="numBeams" name="numBeams" class="form-control" required min="1" max="10" value="4">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="earlyStopping">Early Stopping:</label>
+                                        <select id="earlyStopping" name="earlyStopping" class="form-control" required>
+                                            <option value="true" selected>True</option>
+                                            <option value="false">False</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" onclick="showLoading()">Summarize</button>
+                                    <span id="loadingSpinner" style="display: none;"><i class="fas fa-spinner fa-spin"></i> Summarizing...</span>
+                                </form>
+                            </div>
+                        </div>
+
+
+                        
+                
+
+                    
+                    </div>
+                    <div class="col-md-6 pl-4">
+                        <h5>Summarized Text</h5>
+                        <div class="summary-box">
+                            <div class="fixed-bottom-bar">
+                                <p><strong>Word Count:</strong> <span id="word_count_summary">0</span> |
+                                    <strong>Sentence Count:</strong> <span id="sentence_count_summary">0</span>
+                                </p>
+                            </div>
+                            <p id="summarized_text"></p>
+
+                            <!-- <button id="dashboardButton" onclick="showDashboard()">Open Dashboard</button> -->
+                            <button id="dashboardButton" onclick="showDashboard()">Open Dashboard</button>
+
+
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <script src="{% static 'summarizer.js' %}"></script>
+
+</body>
+
+</html>
+{% endblock %}
+

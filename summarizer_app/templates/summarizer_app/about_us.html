@@ -1,0 +1,115 @@
+<!-- summarizer_app/templates/summarizer_app/about_us.html -->
+{% extends 'summarizer_app/base.html' %}
+{% load static %}
+
+{% block content %}
+    <style>
+        /* Add these styles to improve the about us page UI */
+        body {
+            font-family: 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #F8F9FA; /* Light gray background color */
+            color: #333; /* Dark gray text color */
+        }
+
+        .hero {
+            text-align: center;
+            padding: 100px;
+        }
+
+        .group-members {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .member-card {
+            width: 200px;
+            padding: 20px;
+            margin: 10px;
+            background-color: #FFFFFF; /* White color */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .member-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            object-fit: cover;
+        }
+
+        .member-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #007BFF; /* Apple's blue color */
+        }
+
+        .member-roll {
+            font-size: 14px;
+            color: #666; /* Dark gray text color */
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #F8F9FA;
+            padding: 20px; /* Increased padding for bigger footer */
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+            font-size: 1.2em; /* Increase font size for footer content */
+            text-align: center;
+        }
+    </style>
+
+    <header class="hero">
+        <h1>About Us</h1>
+        <p>Meet the team behind the project</p>
+    </header>
+
+    <div class="group-members">
+        <!-- Member 1 -->
+        <div class="member-card">
+            <img src="{% static 'images/tilak.jpeg' %}" alt="Member 1" class="member-image">
+            <div class="member-name">Tilak Parajuli</div>
+            <div class="member-roll">23282/076</div>
+        </div>
+
+        <!-- Member 2 -->
+        <div class="member-card">
+            <img src="{% static 'images/swechha.jpeg' %}" alt="Member 2" class="member-image">
+            <div class="member-name">Swechha Shrestha</div>
+            <div class="member-roll">23281/076</div>
+        </div>
+
+        <!-- Member 3 -->
+        <div class="member-card">
+            <img src="{% static 'images/suman.jpeg' %}" alt="Member 3" class="member-image">
+            <div class="member-name">Suman Khadka</div>
+            <div class="member-roll">23275/076</div>
+        </div>
+    </div>
+
+    <footer class="footer" id="current-date-time">
+        <!-- Date and time will be updated here -->
+    </footer>
+
+    <script>
+        function updateDateTime() {
+            const today = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            const formattedDateTime = today.toLocaleString('en-US', options);
+            document.getElementById('current-date-time').textContent = formattedDateTime;
+        }
+
+        // Update date and time every second
+        setInterval(updateDateTime, 1000);
+
+        // Initial update
+        updateDateTime();
+    </script>
+{% endblock %}

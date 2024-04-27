@@ -1,0 +1,26 @@
+/* summarizer_app/static/styles.css */
+/* Add your CSS styles for floating prompts here */
+
+.border-right {
+    border-right: 1px solid #ddd;
+}
+
+.summary-box {
+    background-color: hsl(0, 0%, 100%);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Add your CSS styles for centering the element here */
+.center-box {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #ffffff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+

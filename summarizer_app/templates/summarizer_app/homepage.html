@@ -1,0 +1,80 @@
+<!-- summarizer_app/templates/summarizer_app/homepage.html -->
+{% extends 'summarizer_app/base.html' %}
+{% load static %}
+
+{% block content %}
+    <style>
+        /* Add these styles to improve the homepage UI */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding-top: 80px; /* Increased padding to create more space for the navbar */
+            background-color: #F8F9FA; /* Light gray background color */
+            color: #333; /* Dark gray text color */
+        }
+
+        .hero {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .project-title {
+            font-size: 36px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            color: #007BFF; /* Apple's blue color */
+        }
+
+        .project-image {
+            max-width: 90%;
+            height: auto;
+            margin-bottom: 0px;
+            object-fit: cover; /* Make sure the image is fully visible */
+        }
+
+        .main-content {
+            padding: 10px;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #fff; /* White background for footer */
+            padding: 10px; /* Increased padding for bigger footer content */
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Add shadow to bottom */
+            font-size: 1em; /* Increase font size for footer content */
+            text-align: center; /* Center align date and time */
+        }
+    </style>
+
+    <header class="hero">
+        <!-- <h1 class="project-title">Text </h1> -->
+        <!-- <h1 class="project-title">Text Summarization using LSA and T5 Transformers</h1> --> 
+        <!-- <img src="{% static 'images/t5_front_img.png' %}" alt="Project Image" class="project-image"> -->
+        <img src="{% static 'images/front_image.png' %}" alt="Project Image" class="project-image">
+    </header>
+
+    <main class="main-content">
+        <!-- Additional content can be added here as needed -->
+    </main>
+
+    <footer class="footer">
+        <p id="current-date-time"></p>
+    </footer>
+
+    <script>
+        function updateDateTime() {
+            const today = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            const formattedDateTime = today.toLocaleString('en-US', options);
+            document.getElementById('current-date-time').textContent = formattedDateTime;
+        }
+
+        // Update date and time every second
+        setInterval(updateDateTime, 1000);
+
+        // Initial update
+        updateDateTime();
+    </script>
+{% endblock %}

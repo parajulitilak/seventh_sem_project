@@ -1,0 +1,30 @@
+<!-- summarizer_app/templates/summarizer_app/base.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'summarizer_app/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static '/style_homepage.css' %}">
+    <title>{% block title %}Text Summarization{% endblock %}</title>
+    <!-- Add other necessary meta tags, stylesheets, and scripts -->
+    
+</head>
+<body>
+
+{% if user.is_authenticated %}
+    <nav class="navbar">
+        <a href="{% url 'summarizer_app:homepage' %}" class="brand">Homepage</a>
+        <nav class="inline-nav">
+            <a href="{% url 'summarizer_app:about_us' %}">About Us</a>
+            <a class="try-summarizer" href="{% url 'summarizer_app:home' %}">Try Our Summarizer &#x2197;</a>
+            <a href="{% url 'summarizer_app:slides' %}">Slides</a>
+            <a href="{% url 'summarizer_app:logout' %}">Logout</a>
+        </nav>
+    </nav>
+{% endif %}
+
+{% block content %}{% endblock %}
+</body>
+</html>

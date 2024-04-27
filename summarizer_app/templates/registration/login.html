@@ -1,0 +1,72 @@
+<!-- summarizer_project/summarizer_app/templates/registration/login.html -->
+{% extends 'summarizer_app/base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="login-box" id="login-box">
+        <h2>Login</h2>
+        <form method="post" onsubmit="return validateForm()">
+            {% csrf_token %}
+            <div class="textbox">
+                <input type="text" id="username" name="username" required onclick="hideErrorMessage()">
+                <label for="username">Username</label>
+            </div>
+            <div class="textbox">
+                <input type="password" id="password" name="password" required onclick="hideErrorMessage()">
+                <label for="password">Password</label>
+            </div>
+            <button type="submit" class="btn">Login</button>
+        </form>
+        {% if error_displayed %}
+            <div class="error-message" id="error-message" style="color: red; font-size: 14px; margin-top: 5px; text-align: center;">
+                Invalid username or password.
+            </div>
+        {% endif %}
+        <p>Don't have an account? <a href="{% url 'summarizer_app:register' %}">Sign up</a></p>
+        <p><a href="{% url 'summarizer_app:front_page' %}">Back to Main</a></p>
+    </div>
+</div>
+
+<script>
+    function hideErrorMessage() {
+        document.getElementById("error-message").style.display = "none";
+    }
+
+    function validateForm() {
+        var password = document.getElementById("password").value;
+        if (password !== "correct_password") {
+            var errorMessage = document.getElementById("error-message");
+            errorMessage.style.display = "block";
+            // Shake login box
+            var loginBox = document.getElementById("login-box");
+            loginBox.classList.add("shake-animation");
+            setTimeout(function(){
+                loginBox.classList.remove("shake-animation"); // Remove animation after shaking
+            }, 500);
+            return false; // Prevent form submission
+        }
+        return true; // Allow form submission if password is correct
+    }
+</script>
+
+<style>
+    .shake-animation {
+        animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+        10%, 90% {
+            transform: translate3d(-1px, 0, 0);
+        }
+        20%, 80% {
+            transform: translate3d(2px, 0, 0);
+        }
+        30%, 50%, 70% {
+            transform: translate3d(-4px, 0, 0);
+        }
+        40%, 60% {
+            transform: translate3d(4px, 0, 0);
+        }
+    }
+</style>
+{% endblock %}
